@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Storefront (Vitrine Admin)</title>
+    <style>
+        body {
+            background-color: #d2eaec;
+            font-family: "Roboto" sans-serif;
+            margin: 2em;
+            width: 100%;
+
+        }
+
+        h1,
+        h2 {
+            color: blue;
+            align-items: center;
+            font-family: sans-serif;
+            font-size: 400;
+            margin: 2em;
+            text-align: center;
+        }
+
+        h1,
+        h2 {
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            transition: background-color 0.5s ease;
+        }
+
+        .deleted {
+            background-color: #f8d7da;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        input[type="number"] {
+            width: 50px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .form-container {
+            max-width: 80%;
+            margin: 0 auto;
+            background: #f9f9f9;
+            padding: 1.5em;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .form-container div {
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-container label {
+            display: inline-block;
+            width: 80px;
+        }
+
+        p {
+            font-size: 300;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Painel de Gerenciamento da Loja (100% Assíncrono)</h1>
+    <p>
+        As ações (Criar, Deletar) são enviadas via RabbitMQ e a tabela atualiza via WebSocket.
+        Use o <a th:href="@{http://localhost:8084/swagger-ui.html}" target="_blank">Swagger (Leitura)</a>
+        para consultar a API de leitura.
+    </p>
+
+    <h2>Adicionar Novo Produto</h2>
+    <div class="form-container">
+        <form th:action="@{/criar}" method="POST">
+            <div>
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required />
+                <label for="preco" style="width: 50px; margin-left: 10px;">Preço:</label>
+                <input type="number" step="0.01" id="preco" name="preco" required />
+            </div>
+            <div>
+                <label for="descricao">Descrição:</label>
+                <input type="text" id="descricao" name="descricao" style="width: 300px;" />
+                <label for="estoque" style="width: 50px; margin-left: 10px;">Estoque:</label>
+                <input type="number" id="estoque" name="estoque" value="0" required />
+            </div>
+            <button type="submit">Salvar Produto (Via RabbitMQ Via Navegador)</button>
+        </form>
+    </div>
+
+    <h2>Catálogo de Produtos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Fazer Pedido</th>
+                <th>Ações (Admin)</th>
+            </tr>
+        </thead>
+        <tbody id="product-table-body">
+            <tr th:each="produto : ${produtos}" th:id="|produto-${produto.id}|">
+                <td class="nome" th:text="${produto.nome}">Notebook</td>
+                <td class="preco" th:text="|R$ ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}|">R$
+                    15300,00</td>
+                <td>
+                    <span class="estoque" th:id="|estoque-${produto.id}|" th:text="${produto.estoque}">20</span>
+                    unidades
+                </td>
+                <td>
+                    <form th:action="@{/pedir}" method="POST" style="margin: 0; display: flex; gap: 5px;">
+                        <input type="hidden" name="produtoId" th:value="${produto.id}" />
+                        <input class="qtd" type="number" name="quantidade" value="1" min="1" th:max="${produto.estoque}"
+                            style="width: 50px;" />
+                        <button class="comprarBtn" type="submit" th:disabled="${produto.estoque == 0}">Comprar</button>
+                    </form>
+                </td>
+                <td>
+                    <a class="editBtn" th:href="@{/editar/{id}(id=${produto.id})}"
+                        style="text-decoration: none; background: #ffc107; color: black; padding: 5px 10px; border-radius: 3px;">Editar</a>
+                    <form th:action="@{/deletar/{id}(id=${produto.id})}" method="POST"
+                        style="margin: 0; display: inline-block;">
+                        <button class="deleteBtn" type="submit"
+                            style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Deletar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(produtos)}" id="no-products-message">Nenhum produto cadastrado.</p>
+
+    <template id="produto-template">
+        <tr id="produto-0">
+            <td class="nome"></td>
+            <td class="preco"></td>
+            <td><span class="estoque" id="estoque-0"></span> unidades</td>
+            <td>
+                <form action="/pedir" method="POST" style="margin: 0; display: flex; gap: 5px;">
+                    <input type="hidden" name="produtoId" value="0" />
+                    <input class="qtd" type="number" name="quantidade" value="1" min="1" max="0" style="width: 50px;" />
+                    <button class="comprarBtn" type="submit" disabled>Comprar</button>
+                </form>
+            </td>
+            <td>
+                <a class="editBtn" href="/editar/0"
+                    style="text-decoration: none; background: #ffc107; color: black; padding: 5px 10px; border-radius: 3px;">Editar</a>
+                <form action="/deletar/0" method="POST" style="margin: 0; display: inline-block;">
+                    <button class="deleteBtn" type="submit"
+                        style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px;">Deletar</button>
+                </form>
+            </td>
+        </tr>
+    </template>
+
+    <script th:src="@{/webjars/sockjs-client/sockjs.min.js}"></script>
+    <script th:src="@{/webjars/stomp-websocket/stomp.min.js}"></script>
+
+    <script>
+        const tableBody = document.getElementById('product-table-body');
+        const produtoTemplate = document.getElementById('produto-template');
+
+        // ATUALIZA ou CRIA uma linha
+        function upsertProductRow(produto) {
+            const existingRow = document.getElementById('produto-' + produto.id);
+
+            if (existingRow) {
+                // ATUALIZA
+                updateRowData(existingRow, produto);
+                existingRow.classList.add('highlight');
+                setTimeout(() => existingRow.classList.remove('highlight'), 1500);
+            } else {
+                // CRIA
+                const newRow = createRowData(produto);
+                tableBody.appendChild(newRow);
+                newRow.classList.add('highlight');
+                setTimeout(() => newRow.classList.remove('highlight'), 1500);
+            }
+
+            const noProductsMsg = document.getElementById('no-products-message');
+            if (noProductsMsg) noProductsMsg.style.display = 'none';
+        }
+
+        // DELETA uma linha
+        function deleteProductRow(id) {
+            const row = document.getElementById('produto-' + id);
+            if (row) {
+                row.classList.add('deleted'); // Aplica efeito de fade-out
+                setTimeout(() => row.remove(), 1000); // Remove após 1s
+            }
+        }
+
+        // Função auxiliar para criar uma nova linha a partir do template
+        function createRowData(produto) {
+            const newRow = produtoTemplate.content.cloneNode(true).querySelector('tr');
+            newRow.id = 'produto-' + produto.id;
+            updateRowData(newRow, produto);
+            return newRow;
+        }
+
+        // Função auxiliar para atualizar os dados de uma linha
+        function updateRowData(row, produto) {
+            row.querySelector('.nome').textContent = produto.nome || '';
+            row.querySelector('.preco').textContent = 'R$ ' + (produto.preco || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const estoqueSpan = row.querySelector('.estoque');
+            estoqueSpan.textContent = produto.estoque || 0;
+            estoqueSpan.id = 'estoque-' + produto.id;
+
+            const formPedido = row.querySelector('form[action="/pedir"]');
+            formPedido.querySelector('input[name="produtoId"]').value = produto.id;
+            formPedido.querySelector('.qtd').max = produto.estoque;
+            formPedido.querySelector('.comprarBtn').disabled = (produto.estoque == 0);
+
+            row.querySelector('.editBtn').href = '/editar/' + produto.id;
+            row.querySelector('form[action^="/deletar"]').action = '/deletar/' + produto.id;
+        }
+
+        // --- Lógica de Conexão STOMP ---
+        function connect() {
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+            stompClient.connect({}, (frame) => {
+                console.log('Conectado ao WebSocket: ' + frame);
+
+                // Escuta por ATUALIZAÇÕES e CRIAÇÕES
+                stompClient.subscribe('/topic/produtos', (message) => {
+                    console.log("WebSocket: Evento 'produto.atualizado' recebido.");
+                    const produto = JSON.parse(message.body);
+                    upsertProductRow(produto);
+                });
+
+                // Escuta por DELEÇÕES
+                stompClient.subscribe('/topic/produtos/deletado', (message) => {
+                    console.log("WebSocket: Evento 'produto.deletado' recebido.");
+                    const id = JSON.parse(message.body);
+                    deleteProductRow(id);
+                });
+
+            }, (error) => {
+                console.error('Erro WebSocket. Tentando reconectar em 5s...', error);
+                setTimeout(connect, 5000);
+            });
+        }
+
+        connect();
+    </script>
+</body>
+
+</html>

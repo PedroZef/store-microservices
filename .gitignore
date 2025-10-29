@@ -1,0 +1,21 @@
+# Ignora arquivos do Gradle
+.gradle/
+build/
+bin/
+out/
+
+# Ignora arquivos de IDE
+.idea/
+.vscode/
+*.iml
+
+# Ignora arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Ignora logs e arquivos temporários
+*.log
+*.tmp
+
+# Ignora arquivos JAR (não queremos subir os binários)
+*.jar
