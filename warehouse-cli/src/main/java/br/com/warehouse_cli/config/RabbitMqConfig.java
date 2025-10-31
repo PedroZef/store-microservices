@@ -1,12 +1,19 @@
 package br.com.warehouse_cli.config;
 
+import br.com.warehouse_cli.dto.PedidoDTO;
+import br.com.warehouse_cli.model.Produto;
+
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class RabbitMqConfig {
@@ -126,7 +133,22 @@ public class RabbitMqConfig {
     // === Configuração Universal de JSON ===
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        DefaultClassMapper classMapper = new DefaultClassMapper();
+        classMapper.setTrustedPackages("*");
+
+        Map<String, Class<?>> idClassMapping = new HashMap<>();
+
+        idClassMapping.put("br.com.storefront_cli.dto.PedidoDTO", PedidoDTO.class);
+
+        // Quando o TypeID do storefront chegar, converta para a classe local do
+        // warehouse
+        idClassMapping.put("br.com.storefront_cli.model.Produto", Produto.class);
+
+        classMapper.setIdClassMapping(idClassMapping);
+        converter.setClassMapper(classMapper);
+
+        return converter;
     }
 
     @Bean

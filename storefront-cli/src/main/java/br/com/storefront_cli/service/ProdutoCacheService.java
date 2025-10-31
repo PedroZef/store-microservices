@@ -30,7 +30,7 @@ public class ProdutoCacheService {
 
     @CacheEvict(value = "produtos", allEntries = true)
     public void invalidarCacheProdutos() {
-        System.out.println("[STOREFRONT] Cache 'produtos' invalidado.");
+        System.out.println("[STOREFRONT_CLI] Cache 'produtos' invalidado.");
     }
 
 }

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Storefront (Vitrine Admin)</title>
+    <title>Storefront_Cli (Vitrine Admin)</title>
     <style>
         body {
             background-color: #d2eaec;
@@ -64,13 +64,18 @@
         }
 
         button {
+            align-items: center;
             cursor: pointer;
         }
 
+        button .btn {
+            margin-left: flex-end;
+        }
+
         .form-container {
-            max-width: 80%;
+            max-width: 100%;
             margin: 0 auto;
-            background: #f9f9f9;
+            background-color: #f9f9f9;
             padding: 1.5em;
             border-radius: 5px;
             margin-bottom: 20px;
@@ -99,8 +104,8 @@
     <h1>Painel de Gerenciamento da Loja (100% Assíncrono)</h1>
     <p>
         As ações (Criar, Deletar) são enviadas via RabbitMQ e a tabela atualiza via WebSocket.
-        Use o <a th:href="@{http://localhost:8084/swagger-ui.html}" target="_blank">Swagger (Leitura)</a>
-        para consultar a API de leitura.
+        Use o <a th:href="@{http://localhost:8085/swagger-ui.html}" target="_blank">Swagger(API Rest) </a>
+        para consultar a API.
     </p>
 
     <h2>Adicionar Novo Produto</h2>
@@ -118,7 +123,7 @@
                 <label for="estoque" style="width: 50px; margin-left: 10px;">Estoque:</label>
                 <input type="number" id="estoque" name="estoque" value="0" required />
             </div>
-            <button type="submit">Salvar Produto (Via RabbitMQ Via Navegador)</button>
+            <button class="btn" type="submit">Salvar Produto (Via RabbitMQ | Navegador)</button>
         </form>
     </div>
 

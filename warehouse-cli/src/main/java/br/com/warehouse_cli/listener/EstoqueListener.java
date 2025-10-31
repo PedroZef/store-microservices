@@ -1,7 +1,7 @@
 package br.com.warehouse_cli.listener;
 
-import br.com.warehouse_cli.config.RabbitMqConfig;
 import br.com.warehouse_cli.model.Produto;
+import br.com.warehouse_cli.config.RabbitMqConfig;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

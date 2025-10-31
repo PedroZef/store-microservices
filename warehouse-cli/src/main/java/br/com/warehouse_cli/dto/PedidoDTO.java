@@ -1,10 +1,7 @@
 package br.com.warehouse_cli.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-// Objeto simples para receber a mensagem do pedido
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,13 +1,13 @@
 package br.com.storefront_cli.controller;
 
+import br.com.storefront_cli.model.Produto;
+import br.com.storefront_cli.service.ProdutoApiService;
 import br.com.storefront_cli.service.ProdutoCacheService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import br.com.storefront_cli.model.Produto;
-import br.com.storefront_cli.service.ProdutoApiService;
 
 @Controller
 public class ProdutoMvcController {
@@ -17,12 +17,6 @@ public class ProdutoMvcController {
 
     @Autowired
     private ProdutoCacheService cacheService;
-
-    @GetMapping("/")
-    public String viewHomePage(Model model) {
-        model.addAttribute("produtos", cacheService.getProdutos());
-        return "index";
-    }
 
     // Recebe o POST do formulário "Adicionar Novo Produto"
     @PostMapping("/criar")

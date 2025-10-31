@@ -10,10 +10,10 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class StorefrontCliApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(StorefrontCliApplication.class, args);
-    }
-
+	public static void main(String[] args) {
+		SpringApplication.run(StorefrontCliApplication.class, args);
+		System.out.println("Storefront_CLI iniciado com sucesso!");
+	}
 
 	@Bean
 	public RestTemplate restTemplate() {

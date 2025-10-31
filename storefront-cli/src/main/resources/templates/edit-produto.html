@@ -6,7 +6,10 @@
     <title>Editar Produto</title>
     <style>
         body {
-            width: 80%;
+            background-color: #d2eaec;
+            font-family: "Roboto" sans-serif;
+            margin: 2em;
+            width: 100%;
             margin: 0 auto;
             background: #f9f9f9;
             padding: 1.5em;
@@ -15,7 +18,7 @@
         }
 
         h1 {
-            color: blue;
+            color: rgb(0, 174, 255);
             align-items: center;
             font-family: sans-serif;
             font-size: 400;
@@ -59,13 +62,23 @@
             text-decoration: none;
             border-radius: 5px;
             cursor: pointer;
+        }
 
+        p {
+            color: blue;
+            font-size: 300;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
     <h1>Editar Produto (Via RabbitMQ | Via Navegador)</h1>
+
+    <p>
+        Os Produtos no Formato JSON.
+        <a th:href="@{http://localhost:8085/api/produtos}" target="_blank"> Formato JSON (Leitura)</a>
+    </p>
 
     <form th:action="@{/atualizar/{id}(id=${produto.id})}" th:object="${produto}" method="POST">
         <div>

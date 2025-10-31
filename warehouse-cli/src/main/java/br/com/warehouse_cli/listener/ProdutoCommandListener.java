@@ -24,8 +24,6 @@ public class ProdutoCommandListener {
     @RabbitListener(queues = RabbitMqConfig.QUEUE_PRODUTO_UPDATE)
     public void onProdutoAtualizar(Produto produto) {
         System.out.println("[WAREHOUSE_CLI] Comando Recebido: produto.command.update");
-        // O saveAndNotify já lida com criação e atualização, então pode ser
-        // reutilizado.
         produtoService.saveAndNotify(produto);
     }
 

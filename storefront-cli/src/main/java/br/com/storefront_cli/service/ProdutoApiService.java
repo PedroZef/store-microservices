@@ -11,8 +11,7 @@ public class ProdutoApiService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private final String WAREHOUSE_CLI_API_URL = "http://localhost:8084/api/produtos";
-    private final String STOREFRONT_CLI_API_URL = "http://localhost:8082/produtos";
+    private final String WAREHOUSE_CLI_API_URL = "http://localhost:8085/api/produtos";
 
     // --- QUERIES (Leitura via HTTP) ---
     public Produto[] getProdutos() {

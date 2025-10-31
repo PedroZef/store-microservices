@@ -1,9 +1,15 @@
 package br.com.storefront_cli.config;
 
+import br.com.storefront_cli.model.Produto;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +21,8 @@ public class RabbitMqConfig {
 
     // === FLUXO 1: WAREHOUSE -> STOREFRONT (Consumidor) ===
     public static final String EXCHANGE_PRODUTO = "produto-exchange";
-    public static final String QUEUE_PRODUTO = "storefront-produto-queue";
+    public static final String QUEUE_PRODUTO_ATUALIZADO = "storefront-produto-atualizado-queue";
+    public static final String QUEUE_PRODUTO_DELETADO = "storefront-produto-deletado-queue";
     public static final String ROUTING_KEY_PRODUTO_ATUALIZADO = "produto.atualizado";
     public static final String ROUTING_KEY_PRODUTO_DELETADO = "produto.deletado";
 
@@ -25,18 +32,23 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    Queue produtoQueue() {
-        return new Queue(QUEUE_PRODUTO, true);
+    Queue produtoAtualizadoQueue() {
+        return new Queue(QUEUE_PRODUTO_ATUALIZADO, true);
     }
 
     @Bean
-    Binding produtoAtualizadoBinding(Queue produtoQueue, TopicExchange produtoExchange) {
-        return BindingBuilder.bind(produtoQueue).to(produtoExchange).with(ROUTING_KEY_PRODUTO_ATUALIZADO);
+    Queue produtoDeletadoQueue() {
+        return new Queue(QUEUE_PRODUTO_DELETADO, true);
     }
 
     @Bean
-    Binding produtoDeletadoBinding(Queue produtoQueue, TopicExchange produtoExchange) {
-        return BindingBuilder.bind(produtoQueue).to(produtoExchange).with(ROUTING_KEY_PRODUTO_DELETADO);
+    Binding produtoAtualizadoBinding(Queue produtoAtualizadoQueue, TopicExchange produtoExchange) {
+        return BindingBuilder.bind(produtoAtualizadoQueue).to(produtoExchange).with(ROUTING_KEY_PRODUTO_ATUALIZADO);
+    }
+
+    @Bean
+    Binding produtoDeletadoBinding(Queue produtoDeletadoQueue, TopicExchange produtoExchange) {
+        return BindingBuilder.bind(produtoDeletadoQueue).to(produtoExchange).with(ROUTING_KEY_PRODUTO_DELETADO);
     }
 
     // === FLUXO 2: STOREFRONT -> WAREHOUSE (Produtor) ===
@@ -63,7 +75,19 @@ public class RabbitMqConfig {
     // === CONFIGURAÇÃO UNIVERSAL (JSON) ===
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        DefaultClassMapper classMapper = new DefaultClassMapper();
+        classMapper.setTrustedPackages("*");
+
+        Map<String, Class<?>> idClassMapping = new HashMap<>();
+        // Quando a String "br.com.warehouse_cli.model.Produto" chegar...
+        // ...use a classe local "br.com.storefront_cli.model.Produto.class"
+        idClassMapping.put("br.com.warehouse_cli.model.Produto", Produto.class);
+
+        classMapper.setIdClassMapping(idClassMapping);
+        converter.setClassMapper(classMapper);
+
+        return converter;
     }
 
     @Bean
