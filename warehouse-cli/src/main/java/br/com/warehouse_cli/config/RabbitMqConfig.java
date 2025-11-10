@@ -35,7 +35,7 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    Binding produtoAtualizadoBinding(Queue produtoQueue, TopicExchange produtoExchange) {
+    Binding produtoAtualizadoBinding(@Qualifier("produtoQueue") Queue produtoQueue, TopicExchange produtoExchange) {
         return BindingBuilder.bind(produtoQueue).to(produtoExchange).with(ROUTING_KEY_PRODUTO_ATUALIZADO);
     }
 
