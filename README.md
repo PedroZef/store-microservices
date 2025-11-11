@@ -107,9 +107,3 @@ O sistema é composto por dois microserviços:
 
 -   **Gerenciamento do RabbitMQ:** [http://localhost:15672/](http://localhost:15672/) (usuário: `guest` / senha: `guest`)
 
-### Endpoints Úteis
-
--   **Monitor do RabbitMQ:** `http://localhost:15672/` (user: guest / pass: guest)
--   **Vitrine / Painel Admin:** `http://localhost:8082/`
--   **Visulalização dos Produtos(JSON) do Warehouse:** `http://localhost:8084/api/produtos`
--   **API (Swagger) do Warehouse:** `http://localhost:8084/swagger-ui.html`
